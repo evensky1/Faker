@@ -1,8 +1,10 @@
-﻿namespace Faker.Core.Generators.Impl;
+﻿using System.Text;
 
-public class ValueGeneratorDummie
+namespace Faker.Core.Generators.Impl;
+
+public class ValueGeneratorImplDummie
 {
-    public ValueGeneratorDummie()
+    public ValueGeneratorImplDummie()
     {
     }
 }
@@ -156,3 +158,39 @@ public class DoubleGenerator : IValueGenerator
         return type.Name.Equals("Double");
     }
 }
+
+public class StringGenerator : IValueGenerator
+{
+    private const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    public object Generate(Type typeToGenerate, GeneratorContext context)
+    {
+        var res = new StringBuilder();
+        var topBorder = context.Random.Next(2, 64);
+        for (int i = 0; i < topBorder; i++)
+        {
+            res.Append(chars[context.Random.Next(chars.Length)]);
+        }
+
+        return res.ToString();
+    }
+
+    public bool CanGenerate(Type type)
+    {
+        return type.Name.Equals("String");
+    }
+}
+
+public class CharGenerator : IValueGenerator
+{
+    private const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    public object Generate(Type typeToGenerate, GeneratorContext context)
+    {
+        return chars[context.Random.Next(chars.Length)];
+    }
+
+    public bool CanGenerate(Type type)
+    {
+        return type.Name.Equals("Char");
+    }
+}
+

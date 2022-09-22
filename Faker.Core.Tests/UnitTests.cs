@@ -1,3 +1,5 @@
+using NotImplementedException = System.NotImplementedException;
+
 namespace Faker.Core.Tests;
 
 public class Tests
@@ -26,6 +28,14 @@ public class Tests
             Assert.That(typeof(ulong), Is.EqualTo(_faker.Create<ulong>().GetType()));
             Assert.That(typeof(float), Is.EqualTo(_faker.Create<float>().GetType()));
             Assert.That(typeof(double), Is.EqualTo(_faker.Create<double>().GetType()));
+            Assert.That(typeof(string), Is.EqualTo(_faker.Create<string>().GetType()));
+            Assert.That(typeof(char), Is.EqualTo(_faker.Create<char>().GetType()));
         });
+    }
+
+    [Test]
+    public void Not_Supported_Type()
+    {
+        Assert.Throws<NotImplementedException>(() => _faker.Create<Tests>());
     }
 }

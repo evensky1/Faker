@@ -9,7 +9,7 @@ public class CommonGenerator
 
     public CommonGenerator()
     {
-        var types = Assembly.GetAssembly(typeof(ValueGeneratorDummie))?.GetTypes();
+        var types = Assembly.GetAssembly(typeof(ValueGeneratorImplDummie))?.GetTypes();
         _generators =
             (
                 from type in types
@@ -21,7 +21,15 @@ public class CommonGenerator
 
     public object Generate(Type typeToGenerate)
     {
-        var gen = _generators.First(g => g.CanGenerate(typeToGenerate));
-        return gen.Generate(typeToGenerate, new());
+        try
+        {
+            var gen = _generators.First(g => g.CanGenerate(typeToGenerate));
+            return gen.Generate(typeToGenerate, new());
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.Error.WriteLine(e.Message);
+            throw new NotImplementedException();
+        }
     }
 }
