@@ -194,3 +194,15 @@ public class CharGenerator : IValueGenerator
     }
 }
 
+public class DateTimeGenerator : IValueGenerator
+{
+    public object Generate(Type typeToGenerate, GeneratorContext context)
+    {
+        return new DateTime(context.Random.NextInt64(DateTime.Now.Ticks));
+    }
+
+    public bool CanGenerate(Type type)
+    {
+        return type.Name.Equals("DateTime");
+    }
+}
