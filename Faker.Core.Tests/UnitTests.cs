@@ -2,6 +2,17 @@ using NotImplementedException = System.NotImplementedException;
 
 namespace Faker.Core.Tests;
 
+public class User
+{
+    public string Name;
+    public int Age;
+
+    public User(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+}
 public class Tests
 {
     private FakerImpl.Faker _faker;
@@ -31,15 +42,11 @@ public class Tests
             Assert.That(typeof(string), Is.EqualTo(_faker.Create<string>().GetType()));
             Assert.That(typeof(char), Is.EqualTo(_faker.Create<char>().GetType()));
             Assert.That(typeof(DateTime), Is.EqualTo(_faker.Create<DateTime>().GetType()));
+            Assert.That(typeof(User), Is.EqualTo(_faker.Create<User>().GetType()));
+            Assert.That(typeof(List<List<List<User>>>), Is.EqualTo(_faker.Create<List<List<List<User>>>>().GetType()));
         });
     }
-
-    [Test]
-    public void Not_Supported_Type()
-    {
-        Assert.Throws<NotImplementedException>(() => _faker.Create<Tests>());
-    }
-
+    
     [Test]
     public void Arithmetic_Operations_With_Integers()
     {
@@ -95,6 +102,34 @@ public class Tests
         {
             DateTime dateTime = _faker.Create<DateTime>();
             Console.WriteLine(dateTime.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
+        });
+    }
+
+    [Test]
+    public void Deafult_Object_Generation()
+    {
+        Assert.DoesNotThrow(() =>
+        {
+            var user = _faker.Create<User>();
+            Console.WriteLine($"Name: {user.Name}; Age: {user.Age}");
+        });
+    }
+
+    [Test]
+    public void Default_List_Generation()
+    {
+        Assert.DoesNotThrow(() =>
+        {
+            var list = _faker.Create<List<List<User>>>();
+            Console.WriteLine($"pam pam pam {list.Count} {list}");
+            foreach (var users in list)
+            {
+                foreach (var user in users)
+                {
+                    Console.WriteLine($"{user.Name} is {user.Age}");    
+                }
+                Console.WriteLine("----------------------");
+            }
         });
     }
 }

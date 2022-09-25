@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 
 namespace Faker.Core.Generators.Impl;
 
@@ -162,6 +163,7 @@ public class DoubleGenerator : IValueGenerator
 public class StringGenerator : IValueGenerator
 {
     private const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         var res = new StringBuilder();
@@ -183,6 +185,7 @@ public class StringGenerator : IValueGenerator
 public class CharGenerator : IValueGenerator
 {
     private const string chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         return chars[context.Random.Next(chars.Length)];
@@ -204,5 +207,61 @@ public class DateTimeGenerator : IValueGenerator
     public bool CanGenerate(Type type)
     {
         return type.Name.Equals("DateTime");
+    }
+}
+
+public class ObjectGenerator : IValueGenerator
+{
+    public object Generate(Type typeToGenerate, GeneratorContext context)
+    {
+        var fields = typeToGenerate.GetFields();
+        var values = new List<object?>();
+
+        foreach (var fieldInfo in fields)
+        {
+            var createMethod = context.Faker
+                .GetType()
+                .GetMethod("Create")
+                ?.MakeGenericMethod(fieldInfo.FieldType);
+
+            values.Add(createMethod?.Invoke(context.Faker, null));
+        }
+        
+        var obj = Activator.CreateInstance(typeToGenerate, values.ToArray());
+        
+        return obj;
+    }
+
+    public bool CanGenerate(Type type)
+    {
+        return false;
+    }
+}
+
+public class ListGenerator : IValueGenerator
+{
+    public object Generate(Type typeToGenerate, GeneratorContext context)
+    {
+        var createMethod = context.Faker
+            .GetType()
+            .GetMethod("Create")
+            ?.MakeGenericMethod(typeToGenerate.GenericTypeArguments[0]);
+
+        var listType = typeof(List<>).MakeGenericType(typeToGenerate.GenericTypeArguments[0]);
+        var list = (IList) Activator.CreateInstance(listType);
+        
+        int randomLength = context.Random.Next(2, 10);
+        for (int i = 0; i < randomLength; i++)
+        {
+            var current = createMethod?.Invoke(context.Faker, null);
+            if (current != null) list.Add(current);
+        }
+
+        return list;
+    }
+
+    public bool CanGenerate(Type type)
+    {
+        return type.Name.Equals("List`1");
     }
 }

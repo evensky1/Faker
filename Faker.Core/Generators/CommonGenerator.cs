@@ -23,7 +23,10 @@ public class CommonGenerator
     {
         try
         {
-            var gen = _generators.First(g => g.CanGenerate(typeToGenerate));
+            var gen = _generators
+                .Where(g => g.CanGenerate(typeToGenerate))
+                .DefaultIfEmpty(new ObjectGenerator())
+                .First();
             return gen.Generate(typeToGenerate, new());
         }
         catch (InvalidOperationException e)
