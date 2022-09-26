@@ -1,3 +1,5 @@
+using System.Collections;
+
 namespace Faker.Core.Tests;
 
 public class User

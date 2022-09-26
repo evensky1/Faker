@@ -23,7 +23,7 @@ public class BoolGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Boolean");
+        return type == typeof(bool);
     }
 }
 
@@ -38,7 +38,7 @@ public class ByteGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Byte");
+        return type == typeof(byte);
     }
 }
 
@@ -53,7 +53,7 @@ public class Int16Generator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Int16");
+        return type == typeof(short);
     }
 }
 
@@ -68,7 +68,7 @@ public class Int32Generator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Int32");
+        return type == typeof(int);
     }
 }
 
@@ -83,7 +83,7 @@ public class Int64Generator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Int64");
+        return type == typeof(long);
     }
 }
 
@@ -98,7 +98,7 @@ public class UInt16Generator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("UInt16");
+        return type == typeof(ushort);
     }
 }
 
@@ -113,7 +113,7 @@ public class UInt32Generator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("UInt32");
+        return type == typeof(uint);
     }
 }
 
@@ -128,7 +128,7 @@ public class UInt64Generator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("UInt64");
+        return type == typeof(ulong);
     }
 }
 
@@ -143,7 +143,7 @@ public class FloatGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Single");
+        return type == typeof(float);
     }
 }
 
@@ -158,7 +158,7 @@ public class DoubleGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Double");
+        return type == typeof(double);
     }
 }
 
@@ -180,7 +180,7 @@ public class StringGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("String");
+        return type == typeof(string);
     }
 }
 
@@ -195,7 +195,7 @@ public class CharGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("Char");
+        return type == typeof(char);
     }
 }
 
@@ -208,15 +208,14 @@ public class DateTimeGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("DateTime");
+        return type == typeof(DateTime);
     }
 }
 
 public class ObjectGenerator : IValueGenerator
 {
-    [ThreadStatic]
-    private static readonly List<Type> t_prevTypes = new ();
-    
+    [ThreadStatic] private static readonly List<Type> t_prevTypes = new();
+
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         try
@@ -229,16 +228,16 @@ public class ObjectGenerator : IValueGenerator
             return Activator.CreateInstance(typeToGenerate, null);
         }
     }
-    
+
     private object GenerateUnsafe(Type typeToGenerate, GeneratorContext context)
     {
-        if (t_prevTypes.Contains(typeToGenerate)) 
+        if (t_prevTypes.Contains(typeToGenerate))
         {
             throw new StackOverflowException();
         }
-        
+
         t_prevTypes.Add(typeToGenerate);
-        
+
         var largestCtor =
             typeToGenerate
                 .GetConstructors()
