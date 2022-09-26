@@ -212,23 +212,48 @@ public class DateTimeGenerator : IValueGenerator
 
 public class ObjectGenerator : IValueGenerator
 {
+    // public object Generate(Type typeToGenerate, GeneratorContext context)
+    // {
+    //     var fields = typeToGenerate.GetFields();
+    //     var values = new List<object?>();
+    //
+    //     foreach (var fieldInfo in fields)
+    //     {
+    //         var createMethod = context.Faker
+    //             .GetType()
+    //             .GetMethod("Create")
+    //             ?.MakeGenericMethod(fieldInfo.FieldType);
+    //
+    //         values.Add(createMethod?.Invoke(context.Faker, null));
+    //     }
+    //     
+    //     var obj = Activator.CreateInstance(typeToGenerate, values.ToArray());
+    //     
+    //     return obj;
+    // }
+
+
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
-        var fields = typeToGenerate.GetFields();
+        var largestCtor =
+            typeToGenerate
+                .GetConstructors()
+                .MaxBy(c => c.GetParameters().Length);
+        
         var values = new List<object?>();
-
-        foreach (var fieldInfo in fields)
+        
+        foreach (var parameterInfo in largestCtor.GetParameters())
         {
             var createMethod = context.Faker
-                .GetType()
-                .GetMethod("Create")
-                ?.MakeGenericMethod(fieldInfo.FieldType);
-
+                         .GetType()
+                         .GetMethod("Create")
+                         ?.MakeGenericMethod(parameterInfo.ParameterType);
+            
             values.Add(createMethod?.Invoke(context.Faker, null));
         }
         
         var obj = Activator.CreateInstance(typeToGenerate, values.ToArray());
-        
+
         return obj;
     }
 
@@ -248,8 +273,8 @@ public class ListGenerator : IValueGenerator
             ?.MakeGenericMethod(typeToGenerate.GenericTypeArguments[0]);
 
         var listType = typeof(List<>).MakeGenericType(typeToGenerate.GenericTypeArguments[0]);
-        var list = (IList) Activator.CreateInstance(listType);
-        
+        var list = (IList)Activator.CreateInstance(listType);
+
         int randomLength = context.Random.Next(2, 10);
         for (int i = 0; i < randomLength; i++)
         {
