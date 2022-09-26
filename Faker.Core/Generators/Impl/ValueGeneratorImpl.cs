@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -213,6 +214,7 @@ public class DateTimeGenerator : IValueGenerator
 
 public class ObjectGenerator : IValueGenerator
 {
+    
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         var largestCtor =
@@ -220,10 +222,11 @@ public class ObjectGenerator : IValueGenerator
                 .GetConstructors()
                 .MaxBy(c => c.GetParameters().Length);
 
-        var obj = Activator.CreateInstance(typeToGenerate,
-            largestCtor.GetParameters()
-                .Select(parameterInfo => ReflectionMethodCall(parameterInfo.ParameterType, context))
-                .Select(createMethod => createMethod?.Invoke(context.Faker, null)).ToArray());
+        var initializedParams = largestCtor?.GetParameters()
+            .Select(parameterInfo => ReflectionMethodCall(parameterInfo.ParameterType, context))
+            .Select(createMethod => createMethod?.Invoke(context.Faker, null)).ToArray();
+
+        var obj = Activator.CreateInstance(typeToGenerate, initializedParams);
 
         foreach (var propInfo in typeToGenerate.GetProperties())
         {
