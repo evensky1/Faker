@@ -1,4 +1,4 @@
-using System.Collections;
+using DateTime = System.DateTime;
 
 namespace Faker.Core.Tests;
 
@@ -213,13 +213,7 @@ public class Tests
     [Test]
     public void DateTime_No_Default_Value()
     {
-        var dates = new List<DateTime>();
-        for (int i = 0; i < 100; i++)
-        {
-            dates.Add(_faker.Create<DateTime>());
-        }
-
-        Assert.IsNotNull(dates.Find(d => d.Equals(DateTime.MinValue)));
+        Assert.That(_faker.Create<DateTime>(), Is.Not.EqualTo(DateTime.MinValue));
     }
 
     [Test]

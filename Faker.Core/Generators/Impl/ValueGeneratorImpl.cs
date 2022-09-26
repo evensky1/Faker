@@ -203,7 +203,13 @@ public class DateTimeGenerator : IValueGenerator
 {
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
-        return new DateTime(context.Random.NextInt64(DateTime.Now.Ticks));
+        DateTime dateTime;
+        do
+        {
+            dateTime = new DateTime(context.Random.NextInt64(DateTime.Now.Ticks));
+        } while (dateTime == DateTime.MinValue);
+        
+        return dateTime;
     }
 
     public bool CanGenerate(Type type)
