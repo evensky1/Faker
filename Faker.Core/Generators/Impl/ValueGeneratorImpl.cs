@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Reflection;
 using System.Text;
 
 namespace Faker.Core.Generators.Impl;
@@ -231,28 +232,43 @@ public class ObjectGenerator : IValueGenerator
     //     
     //     return obj;
     // }
-
-
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         var largestCtor =
             typeToGenerate
                 .GetConstructors()
                 .MaxBy(c => c.GetParameters().Length);
-        
+
         var values = new List<object?>();
-        
+
         foreach (var parameterInfo in largestCtor.GetParameters())
         {
             var createMethod = context.Faker
-                         .GetType()
-                         .GetMethod("Create")
-                         ?.MakeGenericMethod(parameterInfo.ParameterType);
-            
+                .GetType()
+                .GetMethod("Create")
+                ?.MakeGenericMethod(parameterInfo.ParameterType);
+
             values.Add(createMethod?.Invoke(context.Faker, null));
         }
-        
+
         var obj = Activator.CreateInstance(typeToGenerate, values.ToArray());
+
+        foreach (var propInfo in typeToGenerate.GetProperties())
+        {
+            var value = propInfo.GetValue(obj, null);
+            if (value != null
+                && !string.IsNullOrEmpty(value.ToString())
+                && !value.ToString().Equals("0")) continue;
+            
+            var createMethod = context.Faker
+                .GetType()
+                .GetMethod("Create")
+                ?.MakeGenericMethod(propInfo.PropertyType);
+
+            typeToGenerate.InvokeMember(propInfo.Name,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
+                Type.DefaultBinder, obj, new[] { createMethod?.Invoke(context.Faker, null) });
+        }
 
         return obj;
     }

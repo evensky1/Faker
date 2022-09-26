@@ -1,16 +1,24 @@
-using NotImplementedException = System.NotImplementedException;
-
 namespace Faker.Core.Tests;
 
 public class User
 {
-    public string Name;
-    public int Age;
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public short Shorty { get; set; }
+    
+    public int Height { get; set; }
+
+    public long Id { get; set; }
 
     public User(string name, int age)
     {
         Name = name;
         Age = age;
+    }
+
+    public User()
+    {
     }
 }
 
@@ -55,7 +63,7 @@ public class Tests
         var listOfInts = new List<int>();
         var listOfShorts = new List<short>();
         var listOfBytes = new List<byte>();
-        
+
         for (int i = 0; i < 100; i++)
         {
             listOfLongs.Add(_faker.Create<long>());
@@ -95,7 +103,7 @@ public class Tests
         var listOfLongs = new List<ulong>();
         var listOfInts = new List<uint>();
         var listOfShorts = new List<ushort>();
-        
+
         for (int i = 0; i < 100; i++)
         {
             listOfLongs.Add(_faker.Create<ulong>());
@@ -195,7 +203,7 @@ public class Tests
         Assert.DoesNotThrow(() =>
         {
             var user = _faker.Create<User>();
-            Console.WriteLine($"Name: {user.Name}; Age: {user.Age}");
+            Console.WriteLine($"Name: {user.Name}; Age: {user.Age}; Short: {user.Shorty}; Height: {user.Height}; ID: {user.Id}");
         });
     }
 
