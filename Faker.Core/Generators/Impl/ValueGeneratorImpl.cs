@@ -213,25 +213,6 @@ public class DateTimeGenerator : IValueGenerator
 
 public class ObjectGenerator : IValueGenerator
 {
-    // public object Generate(Type typeToGenerate, GeneratorContext context)
-    // {
-    //     var fields = typeToGenerate.GetFields();
-    //     var values = new List<object?>();
-    //
-    //     foreach (var fieldInfo in fields)
-    //     {
-    //         var createMethod = context.Faker
-    //             .GetType()
-    //             .GetMethod("Create")
-    //             ?.MakeGenericMethod(fieldInfo.FieldType);
-    //
-    //         values.Add(createMethod?.Invoke(context.Faker, null));
-    //     }
-    //     
-    //     var obj = Activator.CreateInstance(typeToGenerate, values.ToArray());
-    //     
-    //     return obj;
-    // }
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         var largestCtor =
@@ -239,19 +220,10 @@ public class ObjectGenerator : IValueGenerator
                 .GetConstructors()
                 .MaxBy(c => c.GetParameters().Length);
 
-        var values = new List<object?>();
-
-        foreach (var parameterInfo in largestCtor.GetParameters())
-        {
-            var createMethod = context.Faker
-                .GetType()
-                .GetMethod("Create")
-                ?.MakeGenericMethod(parameterInfo.ParameterType);
-
-            values.Add(createMethod?.Invoke(context.Faker, null));
-        }
-
-        var obj = Activator.CreateInstance(typeToGenerate, values.ToArray());
+        var obj = Activator.CreateInstance(typeToGenerate,
+            largestCtor.GetParameters()
+                .Select(parameterInfo => ReflectionMethodCall(parameterInfo.ParameterType, context))
+                .Select(createMethod => createMethod?.Invoke(context.Faker, null)).ToArray());
 
         foreach (var propInfo in typeToGenerate.GetProperties())
         {
@@ -259,11 +231,8 @@ public class ObjectGenerator : IValueGenerator
             if (value != null
                 && !string.IsNullOrEmpty(value.ToString())
                 && !value.ToString().Equals("0")) continue;
-            
-            var createMethod = context.Faker
-                .GetType()
-                .GetMethod("Create")
-                ?.MakeGenericMethod(propInfo.PropertyType);
+
+            var createMethod = ReflectionMethodCall(propInfo.PropertyType, context);
 
             typeToGenerate.InvokeMember(propInfo.Name,
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
@@ -276,6 +245,14 @@ public class ObjectGenerator : IValueGenerator
     public bool CanGenerate(Type type)
     {
         return false;
+    }
+
+    private MethodInfo? ReflectionMethodCall(Type type, GeneratorContext context)
+    {
+        return context.Faker
+            .GetType()
+            .GetMethod("Create")
+            ?.MakeGenericMethod(type);
     }
 }
 
