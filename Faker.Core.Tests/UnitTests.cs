@@ -5,8 +5,6 @@ public class User
     public string Name { get; set; }
     public int Age { get; set; }
 
-    public short Shorty { get; set; }
-    
     public int Height { get; set; }
 
     public long Id { get; set; }
@@ -22,6 +20,25 @@ public class User
     }
 }
 
+public class Student
+{
+    public Card Card { get; set; }
+    public string Name { get; set; }
+    public School School { get; set; }
+}
+
+public class Card
+{
+    public int Num { get; set; }
+    public School School { get; set; }
+}
+
+public class School
+{
+    public string Name { get; set; }
+    public List<Student> Students { get; set; }
+}
+
 public class Tests
 {
     private FakerImpl.Faker _faker;
@@ -32,6 +49,12 @@ public class Tests
         _faker = new FakerImpl.Faker();
     }
 
+    [Test]
+    public void Circular_Dependency()
+    {
+        var temp = _faker.Create<School>();
+        Assert.That(typeof(School), Is.EqualTo(temp.GetType()));
+    }
     [Test]
     public void Type_Match_Default_Scenario()
     {
@@ -200,11 +223,8 @@ public class Tests
     [Test]
     public void Default_Object_Generation()
     {
-        Assert.DoesNotThrow(() =>
-        {
-            var user = _faker.Create<User>();
-            Console.WriteLine($"Name: {user.Name}; Age: {user.Age}; Short: {user.Shorty}; Height: {user.Height}; ID: {user.Id}");
-        });
+        var user = _faker.Create<User>();
+        Assert.That(user.Age != 0 || user.Height != 0 || user.Id != 0 || user.Name.Length != 0, Is.True);
     }
 
     [Test]
@@ -217,7 +237,6 @@ public class Tests
             foreach (var user in users)
             {
                 Assert.That(user, Is.Not.Null);
-                Assert.That(user.Name, Is.Not.Empty);
             }
         }
     }

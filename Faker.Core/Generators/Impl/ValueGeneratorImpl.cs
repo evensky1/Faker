@@ -214,9 +214,31 @@ public class DateTimeGenerator : IValueGenerator
 
 public class ObjectGenerator : IValueGenerator
 {
+    [ThreadStatic]
+    private static readonly List<Type> t_prevTypes = new ();
     
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
+        try
+        {
+            return GenerateUnsafe(typeToGenerate, context);
+        }
+        catch (StackOverflowException e)
+        {
+            Console.WriteLine(e);
+            return Activator.CreateInstance(typeToGenerate, null);
+        }
+    }
+    
+    private object GenerateUnsafe(Type typeToGenerate, GeneratorContext context)
+    {
+        if (t_prevTypes.Contains(typeToGenerate)) 
+        {
+            throw new StackOverflowException();
+        }
+        
+        t_prevTypes.Add(typeToGenerate);
+        
         var largestCtor =
             typeToGenerate
                 .GetConstructors()
@@ -242,6 +264,7 @@ public class ObjectGenerator : IValueGenerator
                 Type.DefaultBinder, obj, new[] { createMethod?.Invoke(context.Faker, null) });
         }
 
+        t_prevTypes.Remove(typeToGenerate);
         return obj;
     }
 
