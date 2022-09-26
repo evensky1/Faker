@@ -184,30 +184,9 @@ public class Tests
     }
 
     [Test]
-    public void String_Generation()
-    {
-        Assert.DoesNotThrow(() =>
-        {
-            string str = _faker.Create<string>();
-            str = str.Trim();
-            Console.WriteLine(str);
-        });
-    }
-
-    [Test]
     public void String_Is_Not_Empty()
     {
         Assert.That(_faker.Create<string>(), Is.Not.Empty);
-    }
-
-    [Test]
-    public void DateTime_Generation_By_Format()
-    {
-        Assert.DoesNotThrow(() =>
-        {
-            DateTime dateTime = _faker.Create<DateTime>();
-            Console.WriteLine(dateTime.ToString("dddd, dd MMMM yyyy HH:mm:ss"));
-        });
     }
 
     [Test]
