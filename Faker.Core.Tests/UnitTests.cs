@@ -13,10 +13,11 @@ public class User
         Age = age;
     }
 }
+
 public class Tests
 {
     private FakerImpl.Faker _faker;
-    
+
     [SetUp]
     public void Setup()
     {
@@ -46,44 +47,109 @@ public class Tests
             Assert.That(typeof(List<List<List<User>>>), Is.EqualTo(_faker.Create<List<List<List<User>>>>().GetType()));
         });
     }
-    
+
     [Test]
-    public void Arithmetic_Operations_With_Integers()
+    public void Random_Generation_With_Integers()
     {
-        long a = _faker.Create<long>();
-        int b = _faker.Create<int>();
-        short c = _faker.Create<short>();
-        byte d = _faker.Create<byte>();
-        Assert.DoesNotThrow(() =>
+        var listOfLongs = new List<long>();
+        var listOfInts = new List<int>();
+        var listOfShorts = new List<short>();
+        var listOfBytes = new List<byte>();
+        
+        for (int i = 0; i < 100; i++)
         {
-            var l = a + b + c + d;
-        });
-    }
-    
-    [Test]
-    public void Arithmetic_Operations_With_Unsigned_Integers()
-    {
-        ulong a = _faker.Create<ulong>();
-        uint b = _faker.Create<uint>();
-        ushort c = _faker.Create<ushort>();
-        Assert.DoesNotThrow(() =>
+            listOfLongs.Add(_faker.Create<long>());
+            listOfInts.Add(_faker.Create<int>());
+            listOfShorts.Add(_faker.Create<short>());
+            listOfBytes.Add(_faker.Create<byte>());
+        }
+
+        Assert.Multiple(() =>
         {
-            var l = a + b + c;
+            Assert.That
+            (
+                listOfLongs.FindAll(l => l.Equals(long.MinValue) || l.Equals(0L)),
+                Has.Count.Not.EqualTo(listOfLongs.Count)
+            );
+            Assert.That
+            (
+                listOfInts.FindAll(i => i.Equals(int.MinValue) || i.Equals(0)),
+                Has.Count.Not.EqualTo(listOfInts.Count)
+            );
+            Assert.That
+            (
+                listOfShorts.FindAll(s => s.Equals(short.MinValue) || s.Equals(0)),
+                Has.Count.Not.EqualTo(listOfLongs.Count)
+            );
+            Assert.That
+            (
+                listOfLongs.FindAll(b => b.Equals(long.MinValue) || b.Equals(0)),
+                Has.Count.Not.EqualTo(listOfLongs.Count)
+            );
         });
     }
 
     [Test]
-    public void Arithmetic_Operations_With_Reals()
+    public void Random_Generation_With_Unsigned_Integers()
     {
-        double a = _faker.Create<double>();
-        float b = _faker.Create<float>();
+        var listOfLongs = new List<ulong>();
+        var listOfInts = new List<uint>();
+        var listOfShorts = new List<ushort>();
         
-        Assert.DoesNotThrow(() =>
+        for (int i = 0; i < 100; i++)
         {
-            var d = a + b;
+            listOfLongs.Add(_faker.Create<ulong>());
+            listOfInts.Add(_faker.Create<uint>());
+            listOfShorts.Add(_faker.Create<ushort>());
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That
+            (
+                listOfLongs.FindAll(ul => ul.Equals(0L)),
+                Has.Count.Not.EqualTo(listOfLongs.Count)
+            );
+            Assert.That
+            (
+                listOfInts.FindAll(ui => ui.Equals(0)),
+                Has.Count.Not.EqualTo(listOfInts.Count)
+            );
+            Assert.That
+            (
+                listOfShorts.FindAll(us => us.Equals(0)),
+                Has.Count.Not.EqualTo(listOfLongs.Count)
+            );
         });
     }
-    
+
+    [Test]
+    public void Random_Generation_With_Reals()
+    {
+        var listOfFloats = new List<float>();
+        var listOfDoubles = new List<double>();
+
+        for (int i = 0; i < 100; i++)
+        {
+            listOfFloats.Add(_faker.Create<float>());
+            listOfDoubles.Add(_faker.Create<double>());
+        }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That
+            (
+                listOfFloats.FindAll(f => f.Equals(float.MinValue) || f.Equals(0) || f.Equals(float.NaN)),
+                Has.Count.Not.EqualTo(listOfFloats.Count)
+            );
+            Assert.That
+            (
+                listOfDoubles.FindAll(d => d.Equals(double.MinValue) || d.Equals(0) || d.Equals(double.NaN)),
+                Has.Count.Not.EqualTo(listOfDoubles.Count)
+            );
+        });
+    }
+
     [Test]
     public void String_Generation()
     {
@@ -93,6 +159,12 @@ public class Tests
             str = str.Trim();
             Console.WriteLine(str);
         });
+    }
+
+    [Test]
+    public void String_Is_Not_Empty()
+    {
+        Assert.That(_faker.Create<string>(), Is.Not.Empty);
     }
 
     [Test]
@@ -106,7 +178,19 @@ public class Tests
     }
 
     [Test]
-    public void Deafult_Object_Generation()
+    public void DateTime_No_Default_Value()
+    {
+        var dates = new List<DateTime>();
+        for (int i = 0; i < 100; i++)
+        {
+            dates.Add(_faker.Create<DateTime>());
+        }
+
+        Assert.IsNotNull(dates.Find(d => d.Equals(DateTime.MinValue)));
+    }
+
+    [Test]
+    public void Default_Object_Generation()
     {
         Assert.DoesNotThrow(() =>
         {
@@ -118,18 +202,15 @@ public class Tests
     [Test]
     public void Default_List_Generation()
     {
-        Assert.DoesNotThrow(() =>
+        var list = _faker.Create<List<List<User>>>();
+        foreach (var users in list)
         {
-            var list = _faker.Create<List<List<User>>>();
-            Console.WriteLine($"pam pam pam {list.Count} {list}");
-            foreach (var users in list)
+            Assert.That(users, Is.Not.Empty);
+            foreach (var user in users)
             {
-                foreach (var user in users)
-                {
-                    Console.WriteLine($"{user.Name} is {user.Age}");    
-                }
-                Console.WriteLine("----------------------");
+                Assert.That(user, Is.Not.Null);
+                Assert.That(user.Name, Is.Not.Empty);
             }
-        });
+        }
     }
 }
