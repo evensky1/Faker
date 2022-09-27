@@ -208,7 +208,7 @@ public class DateTimeGenerator : IValueGenerator
         {
             dateTime = new DateTime(context.Random.NextInt64(DateTime.Now.Ticks));
         } while (dateTime == DateTime.MinValue);
-        
+
         return dateTime;
     }
 
@@ -250,23 +250,22 @@ public class ObjectGenerator : IValueGenerator
                 .MaxBy(c => c.GetParameters().Length);
 
         var initializedParams = largestCtor?.GetParameters()
-            .Select(parameterInfo => ReflectionMethodCall(parameterInfo.ParameterType, context))
-            .Select(createMethod => createMethod?.Invoke(context.Faker, null)).ToArray();
+            .Select(parameterInfo => context.Faker.Create(parameterInfo.ParameterType))
+            .ToArray();
 
         var obj = Activator.CreateInstance(typeToGenerate, initializedParams);
 
         foreach (var propInfo in typeToGenerate.GetProperties())
         {
             var value = propInfo.GetValue(obj, null);
+
             if (value != null
                 && !string.IsNullOrEmpty(value.ToString())
                 && !value.ToString().Equals("0")) continue;
 
-            var createMethod = ReflectionMethodCall(propInfo.PropertyType, context);
-
             typeToGenerate.InvokeMember(propInfo.Name,
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty,
-                Type.DefaultBinder, obj, new[] { createMethod?.Invoke(context.Faker, null) });
+                Type.DefaultBinder, obj, new[] { context.Faker.Create(propInfo.PropertyType) });
         }
 
         t_prevTypes.Remove(typeToGenerate);
@@ -275,15 +274,7 @@ public class ObjectGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return false;
-    }
-
-    private MethodInfo? ReflectionMethodCall(Type type, GeneratorContext context)
-    {
-        return context.Faker
-            .GetType()
-            .GetMethod("Create")
-            ?.MakeGenericMethod(type);
+        return true;
     }
 }
 
@@ -291,19 +282,14 @@ public class ListGenerator : IValueGenerator
 {
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
-        var createMethod = context.Faker
-            .GetType()
-            .GetMethod("Create")
-            ?.MakeGenericMethod(typeToGenerate.GenericTypeArguments[0]);
-
         var listType = typeof(List<>).MakeGenericType(typeToGenerate.GenericTypeArguments[0]);
-        var list = (IList)Activator.CreateInstance(listType);
+        var list = (IList)Activator.CreateInstance(listType)!;
 
         int randomLength = context.Random.Next(2, 10);
         for (int i = 0; i < randomLength; i++)
         {
-            var current = createMethod?.Invoke(context.Faker, null);
-            if (current != null) list.Add(current);
+            var current = context.Faker.Create(typeToGenerate.GetGenericArguments()[0]);
+            list?.Add(current);
         }
 
         return list;
@@ -311,6 +297,7 @@ public class ListGenerator : IValueGenerator
 
     public bool CanGenerate(Type type)
     {
-        return type.Name.Equals("List`1");
+        return type.IsGenericType
+               && type.GetGenericTypeDefinition() == typeof(List<>);
     }
 }

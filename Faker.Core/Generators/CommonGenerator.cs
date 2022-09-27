@@ -10,13 +10,18 @@ public class CommonGenerator
     public CommonGenerator()
     {
         var types = Assembly.GetAssembly(typeof(ValueGeneratorImplDummie))?.GetTypes();
-        _generators =
-            (
-                from type in types
-                where type.GetInterface("IValueGenerator") != null
-                select (IValueGenerator)Activator.CreateInstance(type)! ?? throw new InvalidOperationException()
-            )
-            .ToList();
+        _generators = new List<IValueGenerator>()
+        {
+            new BoolGenerator(),
+            new ByteGenerator(), new Int16Generator(), new Int32Generator(), new Int64Generator(),
+            new UInt16Generator(), new UInt32Generator(), new UInt64Generator(),
+            new FloatGenerator(), new DoubleGenerator(),
+            new ListGenerator(),
+            new StringGenerator(),
+            new CharGenerator(),
+            new DateTimeGenerator(),
+            new ObjectGenerator()
+        };
     }
 
     public object Generate(Type typeToGenerate)
@@ -24,9 +29,8 @@ public class CommonGenerator
         try
         {
             var gen = _generators
-                .Where(g => g.CanGenerate(typeToGenerate))
-                .DefaultIfEmpty(new ObjectGenerator())
-                .First();
+                .First(g => g.CanGenerate(typeToGenerate));
+            
             return gen.Generate(typeToGenerate, new());
         }
         catch (InvalidOperationException e)

@@ -9,7 +9,7 @@ public class Faker : IFaker
         return (T) Create(typeof(T));
     }
 
-    private static object Create(Type t)
+    public object Create(Type t)
     {
         var gen = new CommonGenerator();
         return gen.Generate(t);
