@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -16,9 +15,7 @@ public class BoolGenerator : IValueGenerator
 {
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
-        var bytes = new byte[sizeof(bool)];
-        context.Random.NextBytes(bytes);
-        return BitConverter.ToBoolean(bytes);
+        return true;
     }
 
     public bool CanGenerate(Type type)
@@ -32,7 +29,11 @@ public class ByteGenerator : IValueGenerator
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         var bytes = new byte[sizeof(byte)];
-        context.Random.NextBytes(bytes);
+        do
+        {
+            context.Random.NextBytes(bytes);
+        } while (bytes[0] == 0);
+
         return bytes[0];
     }
 
@@ -48,7 +49,13 @@ public class Int16Generator : IValueGenerator
     {
         var bytes = new byte[sizeof(short)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToInt16(bytes);
+        short value = 0;
+        do
+        {
+            value = BitConverter.ToInt16(bytes);
+        } while (value == 0);
+        
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -63,7 +70,14 @@ public class Int32Generator : IValueGenerator
     {
         var bytes = new byte[sizeof(int)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToInt32(bytes);
+        
+        int value = 0;
+        do
+        {
+            value = BitConverter.ToInt32(bytes);
+        } while (value == 0);
+        
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -78,7 +92,14 @@ public class Int64Generator : IValueGenerator
     {
         var bytes = new byte[sizeof(long)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToInt64(bytes);
+        
+        long value = 0;
+        do
+        {
+            value = BitConverter.ToInt64(bytes);
+        } while (value == 0);
+        
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -93,7 +114,14 @@ public class UInt16Generator : IValueGenerator
     {
         var bytes = new byte[sizeof(ushort)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToUInt16(bytes);
+        
+        ushort value = 0;
+        do
+        {
+            value = BitConverter.ToUInt16(bytes);
+        } while (value == 0);
+        
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -108,7 +136,13 @@ public class UInt32Generator : IValueGenerator
     {
         var bytes = new byte[sizeof(uint)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToUInt32(bytes);
+        uint value = 0;
+        do
+        {
+            value = BitConverter.ToUInt32(bytes);
+        } while (value == 0);
+
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -123,7 +157,13 @@ public class UInt64Generator : IValueGenerator
     {
         var bytes = new byte[sizeof(ulong)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToUInt64(bytes);
+        ulong value = 0;
+        do
+        {
+            value = BitConverter.ToUInt64(bytes);
+        } while (value == 0);
+        
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -138,7 +178,13 @@ public class FloatGenerator : IValueGenerator
     {
         var bytes = new byte[sizeof(float)];
         context.Random.NextBytes(bytes);
-        return BitConverter.ToSingle(bytes);
+        float value = 0;
+        do
+        {
+            value = BitConverter.ToSingle(bytes);
+        } while (value == 0);
+
+        return value;
     }
 
     public bool CanGenerate(Type type)
@@ -152,8 +198,14 @@ public class DoubleGenerator : IValueGenerator
     public object Generate(Type typeToGenerate, GeneratorContext context)
     {
         var bytes = new byte[sizeof(double)];
-        context.Random.NextBytes(bytes);
-        return BitConverter.ToDouble(bytes);
+        context.Random.NextBytes(bytes); 
+        double value = 0;
+        do
+        {
+            value = BitConverter.ToDouble(bytes);
+        } while (value == 0);
+
+        return value;
     }
 
     public bool CanGenerate(Type type)
