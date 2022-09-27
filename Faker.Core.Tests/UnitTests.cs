@@ -1,3 +1,4 @@
+using System.Collections;
 using DateTime = System.DateTime;
 
 namespace Faker.Core.Tests;
@@ -214,5 +215,11 @@ public class Tests
                 Assert.That(user, Is.Not.Null);
             }
         }
+    }
+
+    [Test]
+    public void Not_Supported_Type()
+    {
+        Assert.That(typeof(ArrayList), Is.EqualTo(_faker.Create<ArrayList>().GetType()));
     }
 }

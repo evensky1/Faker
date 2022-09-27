@@ -228,7 +228,7 @@ public class ObjectGenerator : IValueGenerator
         {
             return GenerateUnsafe(typeToGenerate, context);
         }
-        catch (StackOverflowException e)
+        catch (Exception e)
         {
             Console.WriteLine(e);
             return Activator.CreateInstance(typeToGenerate, null);
