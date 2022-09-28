@@ -9,7 +9,6 @@ public class CommonGenerator
 
     public CommonGenerator()
     {
-        var types = Assembly.GetAssembly(typeof(ValueGeneratorImplDummie))?.GetTypes();
         _generators = new List<IValueGenerator>()
         {
             new BoolGenerator(),

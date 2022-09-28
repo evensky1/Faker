@@ -4,13 +4,6 @@ using System.Text;
 
 namespace Faker.Core.Generators.Impl;
 
-public class ValueGeneratorImplDummie
-{
-    public ValueGeneratorImplDummie()
-    {
-    }
-}
-
 public class BoolGenerator : IValueGenerator
 {
     public object Generate(Type typeToGenerate, GeneratorContext context)
